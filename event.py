@@ -18,10 +18,10 @@ class Event:
         self.type = type
         self.players = players
 
-    def add_player(self, player:Player):
+    def register_player(self, player:Player):
         self.players.append(player)
 
-    def remove_player(self, player:Player):
+    def unregister_player(self, player:Player):
         if self.players.__contains__(player): self.players.remove(player)
 
     @abstractmethod
