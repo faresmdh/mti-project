@@ -2,6 +2,8 @@ import csv
 import html
 from collections import defaultdict
 
+from club import Club
+
 
 def csv_to_nested_dict(csv_file):
     # nested dictionary format
@@ -56,13 +58,19 @@ def players_to_html(data):
 
 
 if __name__ == "__main__":
-    filename = "data.txt"  # change to your file name
-    players = csv_to_nested_dict(filename)
-    print(players)
-    html_txt = players_to_html(players)
-    with open("players.html", "w", encoding="utf-8") as f:
-        f.write(html_txt)
 
-    print("HTML file generated: players.html")
+    players_csv_file = "players.csv"
+    club = Club("ABR Djebahia","ABRD",[])
+    club.add_players_from_csv(players_csv_file)
+    club.show_dashboard()
+
+    # filename = "players.csv"  # change to your file name
+    # players = csv_to_nested_dict(filename)
+    # print(players)
+    # html_txt = players_to_html(players)
+    # with open("players.html", "w", encoding="utf-8") as f:
+    #     f.write(html_txt)
+    #
+    # print("HTML file generated: players.html")
 
 

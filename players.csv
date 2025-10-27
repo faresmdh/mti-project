@@ -1,0 +1,21 @@
+id	name	email	age	phone	category	address	join_date	positions	skills	subscription_status
+101	Ahmed Bensalem	ahmbens@hotmail.com	16	0550000001	Cadets	Cité 11 Décembre, Bouira	2024-02-14	["Defender", "Midfielder"]	["Tackling", "Passing", "Vision"]	Unpaid
+102	Rachid Tarek	rachid.tarek@email.com	18	0550000002	Juniors	Avenue de l’Indépendance, Bouira	2024-03-05	["Midfielder", "Winger"]	["Dribbling", "Passing", "Stamina"]	Unpaid
+103	Samir Belkacem	samir.belkacem@email.com	24	0550000003	Senior	Cité 140 Logements, Bouira	2024-04-22	["Forward", "Winger"]	["Finishing", "Speed", "Off the Ball"]	Unpaid
+104	Yacine Mokrane	yacine.mokrane@email.com	15	0550000004	Cadets	Rue de la République, Bouira	2024-05-09	["Goalkeeper", "Defender"]	["Reflexes", "Positioning", "Communication"]	Unpaid
+105	Karim Djabali	karim.djabali@email.com	19	0550000005	Juniors	Cité 300 Logements, Bouira	2024-05-27	["Defender", "Midfielder"]	["Marking", "Tackling", "Composure"]	Unpaid
+106	Farid Aït Salah	farid.salah@email.com	27	0550000006	Senior	Cité du 1er Novembre, Bouira	2024-06-12	["Midfielder", "Forward"]	["Passing", "Leadership", "Vision"]	Unpaid
+107	Nadir Zeroual	nadir.zeroual@email.com	17	0550000007	Cadets	Cité El-Bassatine, Bouira	2024-07-03	["Forward", "Midfielder"]	["Dribbling", "Finishing", "Speed"]	Unpaid
+108	Mohamed Haroun	mohamed.haroun@email.com	18	0550000008	Juniors	Quartier Aïn Bessem, Bouira	2024-07-29	["Goalkeeper", "Defender"]	["Shot Stopping", "Distribution", "Focus"]	Unpaid
+109	Ali Bouzid	ali.bouzid@email.com	25	0550000009	Senior	Cité 1000 Logements, Bouira	2024-08-18	["Defender", "Sweeper"]	["Positioning", "Heading", "Tackling"]	Unpaid
+110	Youssef Aissa	youssef.aissa@email.com	16	0550000010	Cadets	Cité Aïn Laloui, Bouira	2024-09-06	["Midfielder", "Winger"]	["Passing", "Crossing", "Agility"]	Unpaid
+111	Omar Ghali	omar.ghali@email.com	19	0550000011	Juniors	Cité des Frères Bouali, Bouira	2024-09-23	["Forward", "Second Striker"]	["Finishing", "Creativity", "Dribbling"]	Unpaid
+112	Adel Belhadj	adel.belhadj@email.com	28	0550000012	Senior	Cité El-Wiam, Bouira	2024-10-08	["Goalkeeper", "Coach"]	["Leadership", "Reflexes", "Communication"]	Unpaid
+113	Fares Djerad	fares.djerad@email.com	15	0550000013	Cadets	Cité 80 Logements, Bouira	2024-11-21	["Defender", "Full-back"]	["Marking", "Crossing", "Speed"]	Unpaid
+114	Salah Eddine	salah.eddine@email.com	17	0550000014	Juniors	Cité El-Khodja, Bouira	2025-01-13	["Midfielder", "Playmaker"]	["Passing", "Vision", "Ball Control"]	Unpaid
+115	Hakim Boudjema	hakim.boudjema@email.com	26	0550000015	Senior	Cité 220 Logements, Bouira	2025-02-07	["Forward", "Winger"]	["Finishing", "Speed", "Agility"]	Unpaid
+116	Tarek Bensalem	tarek.bensalem@email.com	16	0550000016	Cadets	Cité Ali Mellah, Bouira	2025-03-15	["Goalkeeper", "Sweeper Keeper"]	["Reflexes", "Composure", "Distribution"]	Unpaid
+117	Amine Khelifa	amine.khelifa@email.com	19	0550000017	Juniors	Cité El-Djazair, Bouira	2025-05-02	["Defender", "Midfielder"]	["Tackling", "Passing", "Discipline"]	Unpaid
+118	Zinedine Mabrouk	zinedine.mabrouk@email.com	29	0550000018	Senior	Cité M’chedallah, Bouira	2025-06-20	["Midfielder", "Captain"]	["Leadership", "Passing", "Vision"]	Unpaid
+119	Nabil Cherif	nabil.cherif@email.com	16	0550000019	Cadets	Cité Taghzout, Bouira	2025-08-05	["Forward", "Winger"]	["Finishing", "Acceleration", "Dribbling"]	Unpaid
+120	Mustapha Louhichi	mustapha.louhichi@email.com	18	0550000020	Juniors	Cité Haouch El-Bordj, Bouira	2025-09-18	["Goalkeeper", "Defender"]	["Reflexes", "Positioning", "Focus"]	Unpaid

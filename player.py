@@ -68,7 +68,7 @@ class Player:
     def generate_player_card(self):
         print("Player card -> ")
         print(
-            f"• ID : {self.id} \n• Full name : {self.name}\n• Age : {self.age} years old \n• Email address : {self.email}\n• Phone number : {self.phone}\n• Category : {self.category}\n• Joined : {self.join_date}\n• Subscription status: {self.subscription_status}")
+            f"• ID : {self.id} \n• Full name : {self.name}\n• Age : {self.age} years old \n• Email address : {self.email}\n• Phone number : {self.phone}\n• Category : {self.category}\n• Joined : {self.join_date}\n• Address : {self.address}\n• Subscription status: {self.subscription_status}")
         print("• Positions :")
         for p in self.positions:
             print(f"    - {p}")

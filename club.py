@@ -1,3 +1,5 @@
+import csv
+
 from player import Player
 
 
@@ -19,7 +21,6 @@ class Club:
             print("=============================================")
             p.generate_player_card()
 
-
     def add_player(self, player: Player):
         self.players.append(player)
 
@@ -33,6 +34,28 @@ class Club:
                 result.append(player)
 
         return result
+
+    def init_players_from_csv(self,csv_file):
+        with open(csv_file, encoding='utf-8') as f:
+            reader = csv.DictReader(f, delimiter="\t")
+            for row in reader:
+                player = Player(
+                    id = row['id'],
+                    name= row['name'],
+                    email= row['email'],
+                    age= int(row['age']),
+                    phone= row['phone'],
+                    category= row['category'],
+                    address= row['address'],
+                    join_date= row['join_date'],
+                    positions= [row['positions']],
+                    skills= [row['skills']],
+                    subscription_status= row['subscription_status'],
+                )
+                self.add_player(player)
+
+
+
 
 
 if __name__ == "__main__":
