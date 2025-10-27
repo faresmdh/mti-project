@@ -1,0 +1,21 @@
+player_id	player_name	email	phone	category	position	age
+101	Ahmed Bensalem	ahmbens@hotmail.com	0550000001	Cadets	Defender	16
+102	Rachid Tarek	rachid.tarek@email.com	0550000002	Juniors	Midfielder	18
+103	Samir Belkacem	samir.belkacem@email.com	0550000003	Senior	Forward	24
+104	Yacine Mokrane	yacine.mokrane@email.com	0550000004	Cadets	Goalkeeper	15
+105	Karim Djabali	karim.djabali@email.com	0550000005	Juniors	Defender	19
+106	Farid Aït Salah	farid.salah@email.com	0550000006	Senior	Midfielder	27
+107	Nadir Zeroual	nadir.zeroual@email.com	0550000007	Cadets	Forward	17
+108	Mohamed Haroun	mohamed.haroun@email.com	0550000008	Juniors	Goalkeeper	18
+109	Ali Bouzid	ali.bouzid@email.com	0550000009	Senior	Defender	25
+110	Youssef Aissa	youssef.aissa@email.com	0550000010	Cadets	Midfielder	16
+111	Omar Ghali	omar.ghali@email.com	0550000011	Juniors	Forward	19
+112	Adel Belhadj	adel.belhadj@email.com	0550000012	Senior	Goalkeeper	28
+113	Fares Djerad	fares.djerad@email.com	0550000013	Cadets	Defender	15
+114	Salah Eddine	salah.eddine@email.com	0550000014	Juniors	Midfielder	17
+115	Hakim Boudjema	hakim.boudjema@email.com	0550000015	Senior	Forward	26
+116	Tarek Bensalem	tarek.bensalem@email.com	0550000016	Cadets	Goalkeeper	16
+117	Amine Khelifa	amine.khelifa@email.com	0550000017	Juniors	Defender	19
+118	Zinedine Mabrouk	zinedine.mabrouk@email.com	0550000018	Senior	Midfielder	29
+119	Nabil Cherif	nabil.cherif@email.com	0550000019	Cadets	Forward	16
+120	Mustapha Louhichi	mustapha.louhichi@email.com	0550000020	Juniors	Goalkeeper	18
