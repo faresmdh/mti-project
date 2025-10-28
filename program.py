@@ -54,14 +54,11 @@ def players_to_html(data):
     html.append("</body></html>")
     return "\n".join(html)
 
-
-
-
 if __name__ == "__main__":
 
     players_csv_file = "players.csv"
     club = Club("ABR Djebahia","ABRD",[])
-    club.add_players_from_csv(players_csv_file)
+    club.init_players_from_csv(players_csv_file)
     club.show_dashboard()
 
     # filename = "players.csv"  # change to your file name
