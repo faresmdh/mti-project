@@ -23,6 +23,7 @@ class Match(Event):
         print("• Registered players :")
         for p in self.players:
             print(f"    - {p.name} ({p.positions})")
+        print("----------------------------------------------------------")
 
 if __name__ == "__main__":
     # creating match

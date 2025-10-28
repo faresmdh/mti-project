@@ -1,6 +1,7 @@
 import csv
 import html
 from collections import defaultdict
+from random import random, randint
 
 from club import Club
 
@@ -56,10 +57,31 @@ def players_to_html(data):
 
 if __name__ == "__main__":
 
+    # CSV data files
     players_csv_file = "players.csv"
+    events_csv_file = "events.csv"
+    subscriptions_csv_file = "subscriptions.csv"
+
+    # Creating a club
     club = Club("ABR Djebahia","ABRD",[])
+
+    # Init data from csv to club
     club.init_players_from_csv(players_csv_file)
+    club.init_events_from_csv(events_csv_file)
+    club.init_subscriptions_from_csv(subscriptions_csv_file)
+
+    # Showing dashboard
     club.show_dashboard()
+
+    # Register random players to events
+    for e in club.events:
+        for i in range(0,11):
+            e.register_player(club.players[randint(0, 14)])
+        e.display_event()
+
+    # showing subscriptions
+    for s in club.subscriptions:
+        s.display_subscription()
 
     # filename = "players.csv"  # change to your file name
     # players = csv_to_nested_dict(filename)

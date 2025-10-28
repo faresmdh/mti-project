@@ -1,6 +1,11 @@
 import csv
 
+from event import Event
+from match import Match
 from player import Player
+from subscription import Subscription
+from training import Training
+import json
 
 
 class Club:
@@ -8,11 +13,15 @@ class Club:
             self,
             name: str = "",
             abbreviation: str = "",
-            players: list = []
+            players: list = [],
+            events: list = [],
+            subscriptions: list = []
     ):
         self.name = name
         self.abbreviation = abbreviation
         self.players = players
+        self.events = events
+        self.subscriptions = subscriptions
 
     def show_dashboard(self):
         print(f"{self.name} ({self.abbreviation})")
@@ -54,6 +63,68 @@ class Club:
                 )
                 self.add_player(player)
 
+    def add_event(self,event:Event):
+        self.events.append(event)
+
+    def add_subscription(self,subscription:Subscription):
+        self.subscriptions.append(subscription)
+
+    def init_events_from_csv(self,csv_file):
+        with open(csv_file, encoding='utf-8') as f:
+            reader = csv.DictReader(f, delimiter=",")
+            for row in reader:
+                players_data = json.loads(row['players']) if row['players'] else []
+                players = [
+                    Player(
+                        id=p['id'],
+                        name=p.name,
+                        email=p.email,
+                        age=int(p.age),
+                        phone=p.phone,
+                        category=p.category,
+                        address=p.address,
+                        join_date=p.join_date,
+                        positions=p.positions,
+                        skills=p.skills,
+                        subscription_status=p.subscription_status
+                    )
+                    for p in players_data
+                ]
+
+                # Create the correct event type
+                if row['type'] == "Match":
+                    event = Match(
+                        id=int(row['id']),
+                        name=row.get('name', ''),
+                        date=row.get('date', ''),
+                        organizer=row.get('organizer', ''),
+                        players=players,
+                        opponent=row.get('opponent', ''),
+                        result=row.get('result', '')
+                    )
+                elif row['type'] == "Training":
+                    event = Training(
+                        id=int(row['id']),
+                        name=row.get('name', ''),
+                        date=row.get('date', ''),
+                        organizer=row.get('organizer', ''),
+                        players=players,
+                        duration=row.get('duration', '')
+                    )
+                self.add_event(event)
+
+    def init_subscriptions_from_csv(self, csv_file):
+        with open(csv_file, encoding='utf-8') as f:
+            reader = csv.DictReader(f, delimiter=",")
+            for row in reader:
+                subscription = Subscription(
+                    player_id=int(row['player_id']),
+                    date_from=row['date_from'],
+                    date_to=row['date_to'],
+                    status=row.get('status', 'Unpaid'),
+                    amount=float(row.get('amount', 0))
+                )
+                self.add_subscription(subscription)
 
 
 
