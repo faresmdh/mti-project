@@ -57,6 +57,9 @@ def players_to_html(data):
 if __name__ == "__main__":
 
     clubRepo = ClubRepository()
+    clubRepo.init_players_from_csv("data/players.csv")
+    clubRepo.init_events_from_csv("data/events.csv")
+    clubRepo.init_subscriptions_from_csv("data/subscriptions.csv")
 
     # Creating a club
     club = Club("ABR Djebahia","ABRD",clubRepo)
@@ -65,14 +68,14 @@ if __name__ == "__main__":
     club.show_dashboard()
 
     # Register random players to events
-    for e in club.events:
-        for i in range(0,11):
-            e.register_player(club.players[randint(0, 14)])
-        e.display_event()
-
-    # showing subscriptions
-    for s in club.subscriptions:
-        s.display_subscription()
+    # for e in club.clubRepo.events:
+    #     for i in range(0,11):
+    #         e.register_player(club.clubRepo.players[randint(0, 14)])
+    #     e.display_event()
+    #
+    # # showing subscriptions
+    # for s in club.clubRepo.subscriptions:
+    #     s.display_subscription()
 
     # filename = "players.csv"  # change to your file name
     # players = csv_to_nested_dict(filename)

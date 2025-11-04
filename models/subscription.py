@@ -12,3 +12,10 @@ class Subscription(BasicSubscription):
     ):
         super().__init__(player_id,date,status,amount)
         self.duration = duration
+
+    def update_status(self,is_paid:bool):
+        super()
+
+
+    def display_subscription(self):
+        super()

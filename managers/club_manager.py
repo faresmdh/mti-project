@@ -87,10 +87,10 @@ class ClubRepository:
             for row in reader:
                 subscription = Subscription(
                     player_id=int(row['player_id']),
-                    date_from=row['date_from'],
-                    date_to=row['date_to'],
+                    date=row['date'],
                     status=row.get('status', 'Unpaid'),
-                    amount=float(row.get('amount', 0))
+                    amount=float(row.get('amount', 0)),
+                    duration=int(row.get('duration'))
                 )
                 self.subscriptions.append(subscription)
                 
