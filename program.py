@@ -1,9 +1,8 @@
 import csv
-import html
-from collections import defaultdict
-from random import random, randint
+from random import randint
 
-from club import Club
+from models.club import Club
+from managers.club_manager import ClubRepository
 
 
 def csv_to_nested_dict(csv_file):
@@ -57,18 +56,10 @@ def players_to_html(data):
 
 if __name__ == "__main__":
 
-    # CSV data files
-    players_csv_file = "players.csv"
-    events_csv_file = "events.csv"
-    subscriptions_csv_file = "subscriptions.csv"
+    clubRepo = ClubRepository()
 
     # Creating a club
-    club = Club("ABR Djebahia","ABRD",[])
-
-    # Init data from csv to club
-    club.init_players_from_csv(players_csv_file)
-    club.init_events_from_csv(events_csv_file)
-    club.init_subscriptions_from_csv(subscriptions_csv_file)
+    club = Club("ABR Djebahia","ABRD",clubRepo)
 
     # Showing dashboard
     club.show_dashboard()

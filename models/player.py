@@ -75,26 +75,3 @@ class Player:
         print("• Skills :")
         for s in self.skills:
             print(f"    - {s}")
-
-if __name__ == "__main__":
-    # creating new player
-    p = Player(1,"Meddahi Fares", "fares.mdh1@gmail.com", 25, "0558015936", "Senior", "Djebahia", "13/12/2024",
-               ["Middle", "Attack"], ["Left leg", "Shooter"])
-
-    # adding new position
-    p.add_position("Goal keeper")
-
-    # removing existing position
-    p.remove_position("Attack")
-
-    # adding new skill
-    p.add_skill("Left corners")
-
-    # removing existing skill
-    p.remove_skill("Shooter")
-
-    # update phone and email
-    p.update_player(email="fares.meddahi@univ-bouira.dz",phone="067344652")
-
-    # display player card
-    p.generate_player_card()

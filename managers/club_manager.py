@@ -1,48 +1,22 @@
 import csv
-
-from event import Event
-from match import Match
-from player import Player
-from subscription import Subscription
-from training import Training
 import json
 
+from models.event import Event
+from models.match import Match
+from models.player import Player
+from models.subscription import Subscription
+from models.training import Training
 
-class Club:
+
+class ClubRepository:
+
     def __init__(
             self,
-            name: str = "",
-            abbreviation: str = "",
-            players: list = [],
-            events: list = [],
-            subscriptions: list = []
     ):
-        self.name = name
-        self.abbreviation = abbreviation
-        self.players = players
-        self.events = events
-        self.subscriptions = subscriptions
+        self.players = []
+        self.events = []
+        self.subscriptions = []
 
-    def show_dashboard(self):
-        print(f"{self.name} ({self.abbreviation})")
-        print(f"{self.players.__len__()} players :")
-        for p in self.players:
-            print("=============================================")
-            p.generate_player_card()
-
-    def add_player(self, player: Player):
-        self.players.append(player)
-
-    def delete_player(self, player: Player):
-        self.players.remove(player)
-
-    def search_player(self, keyword: str):
-        result = []
-        for player in self.players:
-            if player.name.__contains__(keyword) or player.positions.__contains__(keyword) or player.skills.__contains__(keyword):
-                result.append(player)
-
-        return result
 
     def init_players_from_csv(self,csv_file):
         with open(csv_file, encoding='utf-8') as f:
@@ -61,13 +35,7 @@ class Club:
                     skills= [row['skills']],
                     subscription_status= row['subscription_status'],
                 )
-                self.add_player(player)
-
-    def add_event(self,event:Event):
-        self.events.append(event)
-
-    def add_subscription(self,subscription:Subscription):
-        self.subscriptions.append(subscription)
+                self.players.append(player)
 
     def init_events_from_csv(self,csv_file):
         with open(csv_file, encoding='utf-8') as f:
@@ -111,7 +79,7 @@ class Club:
                         players=players,
                         duration=row.get('duration', '')
                     )
-                self.add_event(event)
+                self.events.append(event)
 
     def init_subscriptions_from_csv(self, csv_file):
         with open(csv_file, encoding='utf-8') as f:
@@ -124,37 +92,24 @@ class Club:
                     status=row.get('status', 'Unpaid'),
                     amount=float(row.get('amount', 0))
                 )
-                self.add_subscription(subscription)
+                self.subscriptions.append(subscription)
+                
+    def add_player(self, player: Player):
+        self.players.append(player)
 
+    def delete_player(self, player: Player):
+        self.players.remove(player)
 
+    def search_player(self, keyword: str):
+        result = []
+        for player in self.players:
+            if player.name.__contains__(keyword) or player.positions.__contains__(keyword) or player.skills.__contains__(keyword):
+                result.append(player)
 
+        return result
 
-if __name__ == "__main__":
-    # creating a club
-    c = Club("ABR Djebahia", "ABRD", [])
+    def add_event(self,event:Event):
+        self.events.append(event)
 
-    # creating player 1
-    p1 = Player(1, "Meddahi Fares", "fares.mdh1@gmail.com", 25, "0558015936", "Senior", "Djebahia", "13/12/2024",
-                ["Middle", "Attack"], ["Left leg", "Shooter"])
-
-    # creating player 2
-    p2 = Player(2, "Dahmani Abdelhak", "dahmani@gmail.com", 23, "0777777777", "Senior", "Djebahia", "05/02/2025",
-                ["Goal keeper"], ["Right leg", "Goal keeping"])
-
-    # add players to club
-    c.add_player(p1)
-    c.add_player(p2)
-
-    # show dashboard
-    c.show_dashboard()
-
-    # trying search
-    searched_players = c.search_player("Left leg")
-    for p in searched_players:
-        p.generate_player_card()
-
-    # deleting player
-    c.delete_player(p1)
-
-    # showing dashboard again
-    c.show_dashboard()
+    def add_subscription(self,subscription:Subscription):
+        self.subscriptions.append(subscription)
