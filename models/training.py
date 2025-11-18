@@ -9,9 +9,10 @@ class Training(Event):
             date: str = "",
             organizer: str = "",
             players: list = [],
+            e_type:str = "",
             duration: str = ""
     ):
-        super().__init__( id, name, date, organizer, players)
+        super().__init__( id, name, date, organizer, players, e_type)
         self.duration = duration
 
     def display_event(self):

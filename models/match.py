@@ -10,9 +10,10 @@ class Match(Event):
             organizer: str = "",
             players: list = [],
             opponent: str = "",
-            result: str = ""
+            result: str = "",
+            e_type: str = ""
     ):
-        super().__init__( id, name, date, organizer, players)
+        super().__init__( id, name, date, organizer, players, e_type)
         self.opponent = opponent
         self.result = result
 

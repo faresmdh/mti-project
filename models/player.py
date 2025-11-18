@@ -1,29 +1,44 @@
 class Player:
     def __init__(
             self,
-            id: int,
+            id: int = 0,
             name: str = "",
             email: str = "",
-            age: int = "",
+            age: int = 0,
             phone: str = "",
             category: str = "Cadets",
             address: str = "",
             join_date: str = "",
-            positions: list = [],
-            skills: list = [],
+            positions: list = None,
+            skills: list = None,
             subscription_status: str = "Unpaid"
     ):
         self.id = id
         self.name = name
-        self.age = age
         self.email = email
+        self.age = age
         self.phone = phone
         self.category = category
         self.address = address
         self.join_date = join_date
-        self.positions = positions
-        self.skills = skills
+        self.positions = positions if positions is not None else []
+        self.skills = skills if skills is not None else []
         self.subscription_status = subscription_status
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+            "age": self.age,
+            "phone": self.phone,
+            "category": self.category,
+            "address": self.address,
+            "join_date": self.join_date,
+            "positions": self.positions,
+            "skills": self.skills,
+            "subscription_status": self.subscription_status
+        }
 
     def add_position(self, position: str):
         if position is not None:
@@ -64,14 +79,3 @@ class Player:
         if positions is not None : self.positions = positions
         if skills is not None : self.skills = skills
         if subscription_status is not None : self.subscription_status = subscription_status
-
-    def generate_player_card(self):
-        print("Player card -> ")
-        print(
-            f"• ID : {self.id} \n• Full name : {self.name}\n• Age : {self.age} years old \n• Email address : {self.email}\n• Phone number : {self.phone}\n• Category : {self.category}\n• Joined : {self.join_date}\n• Address : {self.address}\n• Subscription status: {self.subscription_status}")
-        print("• Positions :")
-        for p in self.positions:
-            print(f"    - {p}")
-        print("• Skills :")
-        for s in self.skills:
-            print(f"    - {s}")
