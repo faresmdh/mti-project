@@ -36,7 +36,6 @@ class PlayersController:
 
         return player
 
-
     def insert_player(self, player: Player):
         conn = self.db.get_connection()
         cur = conn.cursor()
