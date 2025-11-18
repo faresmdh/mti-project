@@ -13,6 +13,9 @@ This project is a **Football Club Management System** built using the **MVC (Mod
 
 ---
 
+
+<img src="views/img.png"/>
+
 ## Features
 
 * List all players
