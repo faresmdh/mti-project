@@ -2,6 +2,7 @@
 
 This project is a **Football Club Management System** built using the **MVC (Model-View-Controller)** architecture. It provides a REST API for managing players only **(for now)** and allows interaction through a simple HTML dashboard.
 
+<img src="views/img.png"/>
 ---
 
 ## Technologies Used
@@ -12,9 +13,6 @@ This project is a **Football Club Management System** built using the **MVC (Mod
 * **HTML ,CSS and JavaScript** – Simple dashboard for managing players
 
 ---
-
-
-<img src="views/img.png"/>
 
 ## Features
 
