@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Manager - Events Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="members.html" class="logo">Club Manager</a>
+            <div class="menu-toggle" id="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="members.html">Members</a></li>
+                <li><a href="events.html" class="active">Events</a></li>
+                <li><a href="subscriptions.html">Subscriptions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>Event Management</h1>
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Search events...">
+                    <button id="search-btn" class="btn-primary">Search</button>
+                    <button id="reset-search-btn" class="btn-primary">Reset</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="card">
+                    <h2>Create New Event</h2>
+                    <form id="event-form">
+                        <div class="form-group">
+                            <label for="name">Event Name *</label>
+                            <input type="text" id="name" required>
+                            <div class="error-message" id="name-error"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="date">Date *</label>
+                                <input type="date" id="date" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="duration">Duration</label>
+                                <input type="text" id="duration" placeholder="e.g., 90 minutes">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="e_type">Event Type</label>
+                                <select id="e_type">
+                                    <option value="Match">Match</option>
+                                    <option value="Training">Training</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="organizer">Organizer</label>
+                                <input type="text" id="organizer">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="opponent">Opponent (for matches)</label>
+                            <input type="text" id="opponent">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="result">Result</label>
+                            <select id="result">
+                                <option value="">No result</option>
+                                <option value="Win">Win</option>
+                                <option value="Lose">Lose</option>
+                                <option value="Draw">Draw</option>
+                            </select>
+                            <div class="error-message" id="result-error"></div>
+                        </div>
+
+                        <button type="submit" class="btn-success" style="width: 100%;">Create Event</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="card">
+                    <h2>Events List</h2>
+                    <div class="events-list">
+                        <table id="events-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Organizer</th>
+                                    <th>Result</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="events-tbody">
+                                <!-- Event rows will be inserted here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal" id="event-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Event Details</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div id="event-details">
+                <!-- Event details will be inserted here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Players Modal -->
+    <div class="modal" id="register-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Register Players for Event</h2>
+                <button class="close-btn" id="close-register-modal">&times;</button>
+            </div>
+            <div id="register-content">
+                <!-- Registration content will be inserted here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API endpoints
+        const API_BASE_URL = 'http://localhost:5000';
+
+        // DOM Elements
+        const eventForm = document.getElementById('event-form');
+        const eventsTbody = document.getElementById('events-tbody');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const resetSearchBtn = document.getElementById('reset-search-btn');
+        const eventModal = document.getElementById('event-modal');
+        const registerModal = document.getElementById('register-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeRegisterModalBtn = document.getElementById('close-register-modal');
+        const eventDetails = document.getElementById('event-details');
+        const registerContent = document.getElementById('register-content');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.getElementById('nav-links');
+
+        // State variables
+        let events = [];
+        let players = [];
+        let currentEventId = null;
+
+        // Mobile menu toggle
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+            loadPlayers();
+        });
+
+        eventForm.addEventListener('submit', addEvent);
+        searchBtn.addEventListener('click', searchEvents);
+        resetSearchBtn.addEventListener('click', resetSearch);
+        closeModalBtn.addEventListener('click', () => {
+            eventModal.style.display = 'none';
+        });
+        closeRegisterModalBtn.addEventListener('click', () => {
+            registerModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === eventModal) {
+                eventModal.style.display = 'none';
+            }
+            if (e.target === registerModal) {
+                registerModal.style.display = 'none';
+            }
+        });
+
+        // Load all events
+        async function loadEvents() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE_URL}/events`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch events');
+                }
+
+                events = await response.json();
+                console.log('Loaded events:', events);
+                displayEvents(events);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                eventsTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: ${getComputedStyle(document.documentElement).getPropertyValue('--danger-color')};">Error loading events. Please try again.</td></tr>`;
+            }
+        }
+
+        // Load all players for registration
+        async function loadPlayers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/players`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch players');
+                }
+
+                players = await response.json();
+                console.log('Loaded players:', players);
+            } catch (error) {
+                console.error('Error loading players:', error);
+            }
+        }
+
+        // Display events in the table
+        function displayEvents(events) {
+            eventsTbody.innerHTML = '';
+
+            if (events.length === 0) {
+                eventsTbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No events found.</td></tr>';
+                return;
+            }
+
+            events.forEach(event => {
+                const row = document.createElement('tr');
+
+                const typeClass = `type-${event.e_type.toLowerCase()}`;
+
+                row.innerHTML = `
+                    <td>${event.name}</td>
+                    <td>${formatDate(event.date)}</td>
+                    <td><span class="status-badge ${typeClass}">${event.e_type}</span></td>
+                    <td>${event.organizer || 'N/A'}</td>
+                    <td>${event.result || 'N/A'}</td>
+                    <td class="action-buttons">
+                        <button class="btn-primary view-btn" data-id="${event.id}">View</button>
+                        <button class="btn-warning register-btn" data-id="${event.id}">Register</button>
+                        <button class="btn-danger delete-event-btn" data-id="${event.id}">Delete</button>
+                    </td>
+                `;
+
+                eventsTbody.appendChild(row);
+            });
+
+            // Add event listeners to view and register buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const eventId = e.target.getAttribute('data-id');
+                    viewEvent(eventId);
+                });
+            });
+
+            document.querySelectorAll('.register-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const eventId = e.target.getAttribute('data-id');
+                    showRegistrationModal(eventId);
+                });
+            });
+
+            document.querySelectorAll('.delete-event-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const eventId = e.target.getAttribute('data-id');
+                    deleteEvent(eventId);
+                });
+            });
+        }
+
+        // Add a new event
+        async function addEvent(e) {
+            e.preventDefault();
+
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+            });
+
+            // Get form values
+            const name = document.getElementById('name').value.trim();
+            const date = document.getElementById('date').value;
+            const e_type = document.getElementById('e_type').value;
+            const organizer = document.getElementById('organizer').value.trim();
+            const result = document.getElementById('result').value.trim();
+            const opponent = document.getElementById('opponent').value.trim();
+            const duration = document.getElementById('duration').value.trim();
+
+            // Validation
+            let isValid = true;
+
+            if (!name) {
+                document.getElementById('name-error').textContent = 'Event name is required';
+                isValid = false;
+            }
+
+            if (!date) {
+                document.getElementById('date-error').textContent = 'Date is required';
+                isValid = false;
+            }
+
+            // Validate result field based on database constraint
+            if (result && !['Win', 'Lose', 'Draw'].includes(result)) {
+                document.getElementById('result-error').textContent = 'Result must be one of: Win, Lose, Draw, or leave empty';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Create event object - handle result field according to database constraint
+            const event = {
+                name,
+                date,
+                e_type,
+                organizer,
+                // Only include result if it's one of the allowed values, otherwise set to null
+                result: ['Win', 'Lose', 'Draw'].includes(result) ? result : null,
+                opponent,
+                duration
+            };
+
+            console.log('Creating event:', event);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/events`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(event)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create event');
+                }
+
+                // Reset form and reload events
+                eventForm.reset();
+                loadEvents();
+
+                // Show success message
+                alert('Event created successfully!');
+
+            } catch (error) {
+                console.error('Error creating event:', error);
+                alert('Error creating event. Please try again.');
+            }
+        }
+
+        // View event details
+        function viewEvent(eventId) {
+            const event = events.find(e => e.id == eventId);
+
+            if (!event) {
+                alert('Event not found');
+                return;
+            }
+
+            // Use the players array directly from the event (it already contains player objects)
+            const registeredPlayers = event.players || [];
+
+            // Format the event details for display
+            eventDetails.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Name:</label>
+                        <p><strong>${event.name}</strong></p>
+                    </div>
+                    <div class="form-group">
+                        <label>Date:</label>
+                        <p>${formatDate(event.date)}</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Event Type:</label>
+                        <p><span class="status-badge type-${event.e_type.toLowerCase()}">${event.e_type}</span></p>
+                    </div>
+                    <div class="form-group">
+                        <label>Organizer:</label>
+                        <p>${event.organizer || 'N/A'}</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duration:</label>
+                        <p>${event.duration || 'N/A'}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Result:</label>
+                        <p>${event.result || 'N/A'}</p>
+                    </div>
+                </div>
+
+                ${event.opponent ? `
+                <div class="form-group">
+                    <label>Opponent:</label>
+                    <p>${event.opponent}</p>
+                </div>
+                ` : ''}
+
+                <div class="form-group">
+                    <label>Registered Players (${registeredPlayers.length}):</label>
+                    <div class="player-list">
+                        ${registeredPlayers.length > 0
+                            ? registeredPlayers.map(player =>
+                                `<div class="player-item">
+                                    <span>${player.name} (${player.category})</span>
+                                    <button class="btn-danger unregister-btn" data-event-id="${event.id}" data-player-id="${player.id}">Unregister</button>
+                                </div>`
+                              ).join('')
+                            : '<div style="text-align: center; padding: 10px;">No players registered yet.</div>'
+                        }
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners to unregister buttons
+            document.querySelectorAll('.unregister-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const eventId = e.target.getAttribute('data-event-id');
+                    const playerId = e.target.getAttribute('data-player-id');
+                    unregisterPlayerFromDetails(eventId, playerId);
+                });
+            });
+
+            eventModal.style.display = 'flex';
+        }
+
+        // Helper function to get player names from player IDs
+        function getPlayerNamesFromIds(playerIds) {
+            return playerIds.map(playerId => {
+                const player = players.find(p => p.id == playerId);
+                return player ? { id: player.id, name: player.name } : { id: playerId, name: `Unknown (ID: ${playerId})` };
+            });
+        }
+
+        // Show registration modal
+        function showRegistrationModal(eventId) {
+            currentEventId = eventId;
+            const event = events.find(e => e.id == eventId);
+
+            if (!event) {
+                alert('Event not found');
+                return;
+            }
+
+            // Use the players array directly from the event
+            const registeredPlayers = event.players || [];
+
+            // Get registered player IDs to filter them out
+            const registeredPlayerIds = registeredPlayers.map(p => p.id);
+
+            // Filter out already registered players
+            const availablePlayers = players.filter(player =>
+                !registeredPlayerIds.includes(player.id)
+            );
+
+            // Create registration interface
+            registerContent.innerHTML = `
+                <div class="form-group">
+                    <label>Event: <strong>${event.name}</strong></label>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Player to Register:</label>
+                    <select id="player-select">
+                        <option value="">Select a player</option>
+                        ${availablePlayers.map(player => `<option value="${player.id}">${player.name} (${player.category})</option>`).join('')}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button id="register-player-btn" class="btn-success">Register Player</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Registered Players (${registeredPlayers.length}):</label>
+                    <div class="player-list" id="registered-players">
+                        ${registeredPlayers.length > 0
+                            ? registeredPlayers.map(player =>
+                                `<div class="player-item">
+                                    <span>${player.name}  (${player.category})</span>
+                                    <button class="btn-danger unregister-btn" data-event-id="${event.id}" data-player-id="${player.id}">Unregister</button>
+                                </div>`
+                              ).join('')
+                            : '<div style="text-align: center; padding: 10px;">No players registered yet.</div>'
+                        }
+                    </div>
+                </div>
+            `;
+
+            // Add event listener to register button
+            document.getElementById('register-player-btn').addEventListener('click', registerPlayer);
+
+            // Add event listeners to unregister buttons
+            document.querySelectorAll('.unregister-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const eventId = e.target.getAttribute('data-event-id');
+                    const playerId = e.target.getAttribute('data-player-id');
+                    unregisterPlayerInModal(eventId, playerId);
+                });
+            });
+
+            registerModal.style.display = 'flex';
+        }
+
+        // Register a player for an event
+        async function registerPlayer() {
+            const playerSelect = document.getElementById('player-select');
+            const playerId = playerSelect.value;
+
+            if (!playerId) {
+                alert('Please select a player');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/events/${currentEventId}/register/${playerId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to register player');
+                }
+
+                // Reload events to get updated data
+                await loadEvents();
+
+                // Update the registration modal
+                showRegistrationModal(currentEventId);
+
+                // Show success message
+                alert('Player registered successfully!');
+
+            } catch (error) {
+                console.error('Error registering player:', error);
+                alert('Error registering player. Please try again.');
+            }
+        }
+
+        // Unregister a player from event details
+        async function unregisterPlayerFromDetails(eventId, playerId) {
+            if (!confirm('Are you sure you want to unregister this player from the event?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/events/${eventId}/unregister/${playerId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to unregister player');
+                }
+
+                // Reload events to get updated player list
+                await loadEvents();
+
+                // Refresh the event details modal
+                viewEvent(eventId);
+
+                // Show success message
+                alert('Player unregistered successfully!');
+
+            } catch (error) {
+                console.error('Error unregistering player:', error);
+                alert('Error unregistering player. Please try again.');
+            }
+        }
+
+        // Unregister a player from registration modal
+        async function unregisterPlayerInModal(eventId, playerId) {
+            if (!confirm('Are you sure you want to unregister this player from the event?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/events/${eventId}/unregister/${playerId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to unregister player');
+                }
+
+                // Reload events to get updated data
+                await loadEvents();
+
+                // Update the registration modal
+                showRegistrationModal(eventId);
+
+                // Show success message
+                alert('Player unregistered successfully!');
+
+            } catch (error) {
+                console.error('Error unregistering player:', error);
+                alert('Error unregistering player. Please try again.');
+            }
+        }
+
+        async function deleteEvent(eventId) {
+            const event = events.find(e => e.id == eventId);
+
+            if (!event) {
+                alert('Event not found');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete the event "${event.name}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete event');
+                }
+
+                // Reload events to get updated list
+                await loadEvents();
+
+                // Show success message
+                alert('Event deleted successfully!');
+
+            } catch (error) {
+                console.error('Error deleting event:', error);
+                alert('Error deleting event. Please try again.');
+            }
+        }
+
+        // Search events (client-side filtering)
+        function searchEvents() {
+            const query = searchInput.value.trim();
+
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            // Client-side filter
+            const filteredEvents = events.filter(event =>
+                event.name.toLowerCase().includes(query.toLowerCase()) ||
+                event.organizer?.toLowerCase().includes(query.toLowerCase()) ||
+                event.e_type.toLowerCase().includes(query.toLowerCase()) ||
+                (event.opponent && event.opponent.toLowerCase().includes(query.toLowerCase()))
+            );
+
+            displayEvents(filteredEvents);
+        }
+
+        // Reset search and show all events
+        function resetSearch() {
+            searchInput.value = '';
+            loadEvents();
+        }
+
+        // Show loading state
+        function showLoading() {
+            eventsTbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="loading">
+                        <div>Loading events...</div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>

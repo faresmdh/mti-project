@@ -1,9 +1,7 @@
 from db.db_helper import SqLiteHelper
-from json import loads, dumps
+from json import loads, dumps, JSONDecodeError
 
 from models.event import Event
-from models.match import Match
-from models.training import Training
 
 
 class EventController:
@@ -36,16 +34,38 @@ class EventController:
         """
         conn = self.db.get_connection()
         cur = conn.cursor()
+
+        # Simply get all events - players are stored as JSON in the players column
         rows = cur.execute("SELECT * FROM events ORDER BY date DESC").fetchall()
 
         events = []
         for r in rows:
+            # Parse the JSON player data directly from the players column
+            players_json = r["players"]
+            try:
+                # Parse the JSON array of player IDs
+                player_ids = loads(players_json) if players_json else []
+
+                # Convert to list of player objects with id and name
+                players = []
+                for player_id in player_ids:
+                    # Get player details from players table
+                    player_row = cur.execute("SELECT id, name, category FROM players WHERE id = ?", (player_id,)).fetchone()
+                    if player_row:
+                        players.append({
+                            "id": player_row["id"],
+                            "name": player_row["name"],
+                            "category": player_row["category"]
+                        })
+            except JSONDecodeError:
+                players = []
+
             event = Event(
                 id=r["id"],
                 name=r["name"],
                 date=r["date"],
                 organizer=r["organizer"],
-                players=loads(r["players"]),
+                players=players,  # Now contains list of player objects with id and name
                 e_type=r["type"],
                 opponent=r["opponent"],
                 result=r["result"],
@@ -86,3 +106,9 @@ class EventController:
                 (dumps(players_list), event_id)
             )
             conn.commit()
+
+    def delete_event(self, event_id: int):
+        conn = self.db.get_connection()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM events WHERE id = ?", (event_id,))
+        conn.commit()

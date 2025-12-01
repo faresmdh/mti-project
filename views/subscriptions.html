@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Manager - Subscriptions Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="members.html" class="logo">Club Manager</a>
+            <div class="menu-toggle" id="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="members.html">Members</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="subscriptions.html" class="active">Subscriptions</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>Subscription Management</h1>
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Search subscriptions...">
+                    <button id="search-btn" class="btn-primary">Search</button>
+                    <button id="reset-search-btn" class="btn-primary">Reset</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="card">
+                    <h2>Add New Subscription</h2>
+                    <form id="subscription-form">
+                        <div class="form-group">
+                            <label for="player-select">Player *</label>
+                            <select id="player-select" required>
+                                <option value="">Select a player</option>
+                                <!-- Players will be populated dynamically -->
+                            </select>
+                            <div class="player-details" id="player-details" style="display: none;">
+                                <!-- Player details will be shown here -->
+                            </div>
+                            <div class="error-message" id="player-error"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="date">Date *</label>
+                                <input type="date" id="date" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="duration">Duration (days) *</label>
+                                <input type="number" id="duration" min="1" value="30" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="status">Status *</label>
+                                <select id="status" required>
+                                    <option value="Paid">Paid</option>
+                                    <option value="Unpaid">Unpaid</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="amount">Amount (DA) *</label>
+                                <input type="number" id="amount" min="0" step="0.01" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-success" style="width: 100%;">Add Subscription</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="card">
+                    <h2>Subscriptions List</h2>
+                    <div class="subscriptions-list">
+                        <table id="subscriptions-table">
+                            <thead>
+                                <tr>
+                                    <th>Player</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Amount</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subscriptions-tbody">
+                                <!-- Subscription rows will be inserted here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription Details Modal -->
+    <div class="modal" id="subscription-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Subscription Details</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div id="subscription-details">
+                <!-- Subscription details will be inserted here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API endpoints
+        const API_BASE_URL = 'http://localhost:5000';
+
+        // DOM Elements
+        const subscriptionForm = document.getElementById('subscription-form');
+        const subscriptionsTbody = document.getElementById('subscriptions-tbody');
+        const playerSelect = document.getElementById('player-select');
+        const playerDetails = document.getElementById('player-details');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const resetSearchBtn = document.getElementById('reset-search-btn');
+        const subscriptionModal = document.getElementById('subscription-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const subscriptionDetails = document.getElementById('subscription-details');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.getElementById('nav-links');
+
+        // State variables
+        let subscriptions = [];
+        let players = [];
+        let currentPlayerData = null;
+
+        // Mobile menu toggle
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSubscriptions();
+            loadPlayersForSelect();
+        });
+
+        subscriptionForm.addEventListener('submit', addSubscription);
+        searchBtn.addEventListener('click', searchSubscriptions);
+        resetSearchBtn.addEventListener('click', resetSearch);
+        closeModalBtn.addEventListener('click', () => {
+            subscriptionModal.style.display = 'none';
+        });
+
+        // When player selection changes, show player details
+        playerSelect.addEventListener('change', (e) => {
+            const playerId = e.target.value;
+            showPlayerDetails(playerId);
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === subscriptionModal) {
+                subscriptionModal.style.display = 'none';
+            }
+        });
+
+        // Load all subscriptions
+        async function loadSubscriptions() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE_URL}/subscriptions`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch subscriptions');
+                }
+
+                subscriptions = await response.json();
+                console.log('Loaded subscriptions:', subscriptions);
+                displaySubscriptions(subscriptions);
+            } catch (error) {
+                console.error('Error loading subscriptions:', error);
+                subscriptionsTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: ${getComputedStyle(document.documentElement).getPropertyValue('--danger-color')};">Error loading subscriptions. Please try again.</td></tr>`;
+            }
+        }
+
+        // Load players for the dropdown select
+        async function loadPlayersForSelect() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/players`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch players');
+                }
+
+                players = await response.json();
+                console.log('Loaded players:', players);
+                populatePlayerSelect(players);
+            } catch (error) {
+                console.error('Error loading players:', error);
+            }
+        }
+
+        // Populate player select dropdown
+        function populatePlayerSelect(players) {
+            playerSelect.innerHTML = '<option value="">Select a player</option>';
+            players.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.id;
+                option.textContent = `${player.name} (${player.email})`;
+                playerSelect.appendChild(option);
+            });
+        }
+
+        // Show player details when selected
+        function showPlayerDetails(playerId) {
+            const player = players.find(p => p.id == playerId);
+
+            if (player) {
+                playerDetails.style.display = 'block';
+                playerDetails.innerHTML = `
+                    <div><strong>Name:</strong> ${player.name}</div>
+                    <div><strong>Email:</strong> ${player.email}</div>
+                    <div><strong>Category:</strong> ${player.category}</div>
+                    <div><strong>Current Subscription:</strong> <span class="status-badge ${player.subscription_status === 'Paid' ? 'status-paid' : 'status-unpaid'}">${player.subscription_status}</span></div>
+                `;
+                currentPlayerData = player;
+
+                // Set default amount based on player category
+                const amountInput = document.getElementById('amount');
+                if (amountInput.value === '') {
+                    switch(player.category) {
+                        case 'Cadets':
+                            amountInput.value = '800';
+                            break;
+                        case 'Juniors':
+                            amountInput.value = '1000';
+                            break;
+                        case 'Senior':
+                            amountInput.value = '1200';
+                            break;
+                        default:
+                            amountInput.value = '1000';
+                    }
+                }
+            } else {
+                playerDetails.style.display = 'none';
+                currentPlayerData = null;
+            }
+        }
+
+        // Display subscriptions in the table
+        function displaySubscriptions(subscriptions) {
+            subscriptionsTbody.innerHTML = '';
+
+            if (subscriptions.length === 0) {
+                subscriptionsTbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No subscriptions found.</td></tr>';
+                return;
+            }
+
+            subscriptions.forEach(subscription => {
+                const row = document.createElement('tr');
+
+                // Find player name
+                const player = players.find(p => p.id == subscription.player_id);
+                const playerName = player ? player.name : `Player ID: ${subscription.player_id}`;
+
+                const statusClass = subscription.status === 'Paid' ? 'status-paid' : 'status-unpaid';
+
+                row.innerHTML = `
+                    <td>${playerName}</td>
+                    <td>${formatDate(subscription.date)}</td>
+                    <td><span class="status-badge ${statusClass}">${subscription.status}</span></td>
+                    <td>DA${parseFloat(subscription.amount).toFixed(2)}</td>
+                    <td>${subscription.duration} days</td>
+                    <td class="action-buttons">
+                        <button class="btn-primary view-btn" data-id="${subscription.id}">View</button>
+                    </td>
+                `;
+
+                subscriptionsTbody.appendChild(row);
+            });
+
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const subscriptionId = e.target.getAttribute('data-id');
+                    viewSubscription(subscriptionId);
+                });
+            });
+        }
+
+        // Add a new subscription
+        async function addSubscription(e) {
+            e.preventDefault();
+
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+            });
+
+            // Get form values
+            const playerId = playerSelect.value;
+            const date = document.getElementById('date').value;
+            const status = document.getElementById('status').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const duration = parseInt(document.getElementById('duration').value);
+
+            // Validation
+            let isValid = true;
+
+            if (!playerId) {
+                document.getElementById('player-error').textContent = 'Please select a player';
+                isValid = false;
+            }
+
+            if (!date) {
+                // No error element for date, so we'll just alert
+                alert('Date is required');
+                isValid = false;
+            }
+
+            if (isNaN(amount) || amount < 0) {
+                alert('Please enter a valid amount');
+                isValid = false;
+            }
+
+            if (isNaN(duration) || duration < 1) {
+                alert('Please enter a valid duration');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Create subscription object
+            const subscription = {
+                player_id: playerId,
+                date,
+                status,
+                amount: amount.toFixed(2),
+                duration
+            };
+
+            console.log('Creating subscription:', subscription);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/subscriptions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(subscription)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create subscription');
+                }
+
+                // Reset form and reload subscriptions
+                subscriptionForm.reset();
+                playerDetails.style.display = 'none';
+                currentPlayerData = null;
+                loadSubscriptions();
+
+                // Show success message
+                alert('Subscription added successfully!');
+
+            } catch (error) {
+                console.error('Error adding subscription:', error);
+                alert('Error adding subscription. Please try again.');
+            }
+        }
+
+        // View subscription details
+        function viewSubscription(subscriptionId) {
+            const subscription = subscriptions.find(s => s.id == subscriptionId);
+
+            if (!subscription) {
+                alert('Subscription not found');
+                return;
+            }
+
+            // Find player
+            const player = players.find(p => p.id == subscription.player_id);
+
+            // Format the subscription details for display
+            subscriptionDetails.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Player:</label>
+                        <p><strong>${player ? player.name : 'Unknown Player'}</strong></p>
+                        ${player ? `
+                            <div style="margin-top: 5px; font-size: 14px;">
+                                <div><strong>Email:</strong> ${player.email}</div>
+                                <div><strong>Phone:</strong> ${player.phone || 'N/A'}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="form-group">
+                        <label>Date:</label>
+                        <p>${formatDate(subscription.date)}</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <p><span class="status-badge ${subscription.status === 'Paid' ? 'status-paid' : 'status-unpaid'}">${subscription.status}</span></p>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <p>DA${parseFloat(subscription.amount).toFixed(2)}</p>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duration:</label>
+                        <p>${subscription.duration} days</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Subscription ID:</label>
+                        <p>${subscription.id}</p>
+                    </div>
+                </div>
+            `;
+
+            subscriptionModal.style.display = 'flex';
+        }
+
+        // Search subscriptions (client-side filtering)
+        function searchSubscriptions() {
+            const query = searchInput.value.trim();
+
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            const filteredSubscriptions = subscriptions.filter(subscription => {
+                // Find player for this subscription
+                const player = players.find(p => p.id == subscription.player_id);
+                const playerName = player ? player.name.toLowerCase() : '';
+
+                return (
+                    playerName.includes(query.toLowerCase()) ||
+                    subscription.status.toLowerCase().includes(query.toLowerCase()) ||
+                    subscription.amount.toString().includes(query) ||
+                    subscription.duration.toString().includes(query)
+                );
+            });
+
+            displaySubscriptions(filteredSubscriptions);
+        }
+
+        // Reset search and show all subscriptions
+        function resetSearch() {
+            searchInput.value = '';
+            loadSubscriptions();
+        }
+
+        // Show loading state
+        function showLoading() {
+            subscriptionsTbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="loading">
+                        <div>Loading subscriptions...</div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>

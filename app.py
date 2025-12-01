@@ -4,9 +4,11 @@ from flask_cors import CORS
 
 from controllers.event_controller import EventController
 from controllers.players_controller import PlayersController
+from controllers.subscriptions_controller import SubscriptionController
 from db.db_helper import SqLiteHelper
 from models.event import Event
 from models.player import Player
+from models.subscription import Subscription
 
 app = Flask(__name__)
 CORS(app)
@@ -14,6 +16,7 @@ db_helper = SqLiteHelper()
 db_helper.init_db()
 players_controller = PlayersController(db_helper)
 events_controller = EventController(db_helper)
+sub_controller = SubscriptionController(db_helper)
 
 
 # Routes
@@ -92,6 +95,41 @@ def unregister_player(event_id, player_id):
         events_controller.unregister_player(event_id, player_id)
         return jsonify({"status": "ok"})
     except Exception as e:
+        return jsonify({"status": "error", "message": "Something went wrong"}), 500
+
+@app.delete("/events/<int:event_id>")
+def delete_event(event_id):
+    try:
+        events_controller.delete_event(event_id)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": "Something went wrong"}), 500
+
+@app.get("/subscriptions")
+def list_subscriptions():
+    try:
+        result = sub_controller.list_subscriptions()
+        return jsonify([s.to_dict() for s in result])
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", "message": "Something went wrong"}), 500
+
+@app.post("/subscriptions")
+def add_subscription():
+    try:
+        data = request.json
+        sub = Subscription(
+            id = 0,
+            player_id=data.get("player_id", ""),
+            date=data.get("date", ""),
+            status=data.get("status", ""),
+            amount=data.get("amount",""),
+            duration=data.get("duration","")
+        )
+        sub_controller.insert_subscription(sub)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        print(e)
         return jsonify({"status": "error", "message": "Something went wrong"}), 500
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ class SqLiteHelper:
                 phone TEXT NOT NULL,
             
                 category TEXT NOT NULL CHECK (
-                    category IN ('Cadets', 'Juniors', 'Senior')
+                    category IN ('Cadets', 'Juniors', 'Senior' , 'Coach')
                 ),
             
                 address TEXT NOT NULL,

@@ -20,3 +20,14 @@ class Subscription(BasicSubscription):
 
     def display_subscription(self):
         super()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "player_id": self.player_id,
+            "date": self.date,
+            "status": self.status,
+            "amount": self.amount,
+            "duration": self.duration,
+            "player": self.player.to_dict() if self.player else None
+        }
