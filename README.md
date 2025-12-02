@@ -82,6 +82,139 @@ The dashboard is now separated into 03 HTML files and one CSS style file :
 * All API endpoints are working and fully tested with POSTMAN and the HTML dashboard.
 
 
+## Applied design patterns
+* **Factory method :** we have created a class named DictFactory to help create dictionaries for different classes such as member, event or subscription. This class contains a static method named create_dict that takes two parameter.The first one is the type of class we want to convert into dict ("member" or "event" or "subscription"). The second one is the object we want to convert. The function returns a dictionary of this class.
+```python
+import sys
+
+
+class DictFactory:
+    @staticmethod
+    def create_dict(type,element):
+        if type == "member":
+            return {
+                "id": element.id,
+                "name": element.name,
+                "email": element.email,
+                "age": element.age,
+                "phone": element.phone,
+                "category": element.category,
+                "address": element.address,
+                "join_date": element.join_date,
+                "positions": element.positions,
+                "skills": element.skills,
+                "subscription_status": element.subscription_status
+            }
+        elif type == "event":
+            return {
+                "id": element.id,
+                "name": element.name,
+                "date": element.date,
+                "e_type": element.e_type,
+                "organizer": element.organizer,
+                "oponent": element.opponent,
+                "result": element.result,
+                "players": element.players,
+                "duration": element.duration
+            }
+        elif type == "subscription":
+            return {
+                "id": element.id,
+                "player_id": element.player_id,
+                "date": element.date,
+                "status": element.status,
+                "amount": element.amount,
+                "duration": element.duration,
+                "player": DictFactory.create_dict("member",element.player) if element.player else None
+            }
+        else :
+            print("Bad element : " + type)
+            sys.exit()
+```
+applying this design pattern helped us convert objects into dict to send them as API response
+```python
+@app.get("/subscriptions")
+def list_subscriptions():
+    try:
+        result = sub_controller.list_subscriptions()
+        return jsonify([dict_factory.create_dict("subscription",s) for s in result])
+    except Exception as e:
+        return jsonify({"status": "error", "message": "Something went wrong"}), 500
+```
+* **Builder Pattern :**
+We have created a class named SubscriptionBuilder to build a subscription object. The class contains a bunch of setter methods (set_player_id(), set_status()...) and a build method to build that class. The build method returns a Subscription object.
+```python
+from models.subscription import Subscription
+
+
+class SubscriptionBuilder:
+    def __init__(self):
+        self.player_id = None,
+        self.date = None,
+        self.status = "Unpaid",
+        self.amount = None,
+        self.duration = None
+
+    def set_player_id(self, player_id):
+        self.player_id = player_id
+        return self
+
+    def set_date(self, date):
+        self.date = date
+        return self
+
+    def set_status(self, status):
+        self.status = status
+        return self
+
+    def set_amount(self, amount):
+        self.amount = amount
+        return self
+
+    def set_duration(self, duration):
+        self.duration = duration
+        return self
+
+    def build(self):
+        # Validate required fields
+        if self.player_id is None:
+            raise ValueError("player_id is required")
+        if self.amount is None:
+            raise ValueError("amount is required")
+        if self.date is None:
+            raise ValueError("date is required")
+        if self.duration is None:
+            raise ValueError("duration is required")
+
+        return Subscription(
+            id = 0,
+            player_id=self.player_id,
+            date=self.date,
+            status=self.status,
+            amount=self.amount,
+            duration=self.duration
+        )
+```
+applying this design pattern helped us convert data from request body to a subscription object.
+```python
+@app.post("/subscriptions")
+def add_subscription():
+    try:
+        data = request.json
+        subscription = (SubscriptionBuilder()
+                                .set_player_id(data.get("player_id", ""))
+                                .set_date(data.get("date", ""))
+                                .set_status(data.get("status", ""))
+                                .set_amount(data.get("amount", ""))
+                                .set_duration(data.get("duration", ""))
+                                .build())
+        sub_controller.insert_subscription(subscription)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error", "message": "Something went wrong"}), 500
+```
+
 # API Documentation
 This API docs will explain each endpoint including endpoint url, request type (GET, POST or DELETE), request body and the response (case the http request success).
 ## Get all players
