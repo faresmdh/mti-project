@@ -26,7 +26,7 @@ The dashboard is now separated into 03 HTML files and one CSS style file :
 * **SQLite** – Lightweight database to store players, events and subscriptions data
 * **MVC Architecture** – Separate layers for Models, Views, and Controllers
 * **HTML ,CSS and JavaScript** – Simple dashboard for managing players
-
+* **Design patterns** - Factory method and Builder Pattern
 ---
 
 ## Features
