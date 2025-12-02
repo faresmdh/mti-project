@@ -13,21 +13,3 @@ class Subscription(BasicSubscription):
     ):
         super().__init__(id,player_id,date,status,amount)
         self.duration = duration
-
-    def update_status(self,is_paid:bool):
-        super()
-
-
-    def display_subscription(self):
-        super()
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "player_id": self.player_id,
-            "date": self.date,
-            "status": self.status,
-            "amount": self.amount,
-            "duration": self.duration,
-            "player": self.player.to_dict() if self.player else None
-        }

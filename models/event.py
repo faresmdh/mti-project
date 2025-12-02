@@ -23,16 +23,3 @@ class Event(ABC):
         self.result = result
         self.players = players
         self.duration = duration
-
-    def to_dict(self):
-        return {
-            "id":self.id,
-            "name":self.name,
-            "date":self.date,
-            "e_type":self.e_type,
-            "organizer":self.organizer,
-            "oponent":self.opponent,
-            "result":self.result,
-            "players":self.players,
-            "duration":self.duration
-        }

@@ -34,7 +34,6 @@ class SubscriptionController:
         subscriptions = []
 
         for r in rows:
-            # Build Player object
             player = Player(
                 id=r["p_id"],
                 name=r["p_name"],
@@ -49,7 +48,7 @@ class SubscriptionController:
                 subscription_status=r["p_subscription_status"]
             )
 
-            # Build Subscription object
+
             sub = Subscription(
                 id=r["sub_id"],
                 player_id=r["player_id"],

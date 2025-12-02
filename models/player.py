@@ -25,21 +25,6 @@ class Player:
         self.skills = skills if skills is not None else []
         self.subscription_status = subscription_status
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "email": self.email,
-            "age": self.age,
-            "phone": self.phone,
-            "category": self.category,
-            "address": self.address,
-            "join_date": self.join_date,
-            "positions": self.positions,
-            "skills": self.skills,
-            "subscription_status": self.subscription_status
-        }
-
     def add_position(self, position: str):
         if position is not None:
             self.positions.append(position)

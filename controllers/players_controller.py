@@ -1,8 +1,4 @@
-import sqlite3
 from json import loads, dumps
-
-from flask import jsonify
-
 from models.player import Player
 
 class PlayersController:
@@ -124,4 +120,4 @@ class PlayersController:
             for r in rows
         ]
 
-        return jsonify([p.to_dict() for p in players])
+        return players

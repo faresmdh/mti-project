@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-
+from controllers.dict_factory import DictFactory
 from controllers.event_controller import EventController
 from controllers.players_controller import PlayersController
+from controllers.subscription_builder import SubscriptionBuilder
 from controllers.subscriptions_controller import SubscriptionController
 from db.db_helper import SqLiteHelper
 from models.event import Event
@@ -17,18 +18,19 @@ db_helper.init_db()
 players_controller = PlayersController(db_helper)
 events_controller = EventController(db_helper)
 sub_controller = SubscriptionController(db_helper)
+dict_factory = DictFactory()
 
 
 # Routes
 @app.get("/players")
 def list_players():
     result = players_controller.list_players()
-    return result
+    return jsonify([dict_factory.create_dict("member",p) for p in result])
 
 @app.get("/players/<int:player_id>")
 def get_player(player_id):
     result = players_controller.get_player(player_id)
-    return jsonify(result.to_dict())
+    return jsonify(dict_factory.create_dict("member",result))
 
 @app.post("/players")
 def add_player():
@@ -45,7 +47,7 @@ def add_player():
         skills=data.get("skills", []),
         subscription_status=data.get("subscription_status", "Unpaid")
     )
-    result = players_controller.insert_player(player)
+    players_controller.insert_player(player)
     return jsonify({"status": "ok"})
 
 @app.delete("/players/<int:player_id>")
@@ -56,12 +58,12 @@ def delete_player(player_id):
 @app.get("/players/search/<query>")
 def search_players(query):
     result = players_controller.search_player(query)
-    return jsonify([p.to_dict() for p in result])
+    return jsonify([dict_factory.create_dict("member",p) for p in result])
 
 @app.get("/events")
 def list_events():
     result = events_controller.list_events()
-    return jsonify([e.to_dict() for e in result])
+    return jsonify([dict_factory.create_dict("event",e) for e in result])
 
 @app.post("/events")
 def insert_event():
@@ -109,24 +111,22 @@ def delete_event(event_id):
 def list_subscriptions():
     try:
         result = sub_controller.list_subscriptions()
-        return jsonify([s.to_dict() for s in result])
+        return jsonify([dict_factory.create_dict("subscription",s) for s in result])
     except Exception as e:
-        print(e)
         return jsonify({"status": "error", "message": "Something went wrong"}), 500
 
 @app.post("/subscriptions")
 def add_subscription():
     try:
         data = request.json
-        sub = Subscription(
-            id = 0,
-            player_id=data.get("player_id", ""),
-            date=data.get("date", ""),
-            status=data.get("status", ""),
-            amount=data.get("amount",""),
-            duration=data.get("duration","")
-        )
-        sub_controller.insert_subscription(sub)
+        subscription = (SubscriptionBuilder()
+                                .set_player_id(data.get("player_id", ""))
+                                .set_date(data.get("date", ""))
+                                .set_status(data.get("status", ""))
+                                .set_amount(data.get("amount", ""))
+                                .set_duration(data.get("duration", ""))
+                                .build())
+        sub_controller.insert_subscription(subscription)
         return jsonify({"status": "ok"})
     except Exception as e:
         print(e)
