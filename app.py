@@ -2,14 +2,16 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from controllers.dict_factory import DictFactory
+from controllers.event_builder import EventBuilder
 from controllers.event_controller import EventController
+from controllers.member_payment_observer import MemberPaymentObserver
+from controllers.name_adapter import NameAdapter
+from controllers.player_builder import MemberBuilder
 from controllers.players_controller import PlayersController
 from controllers.subscription_builder import SubscriptionBuilder
+from controllers.subscription_subject import SubscriptionSubject
 from controllers.subscriptions_controller import SubscriptionController
 from db.db_helper import SqLiteHelper
-from models.event import Event
-from models.player import Player
-from models.subscription import Subscription
 
 app = Flask(__name__)
 CORS(app)
@@ -17,7 +19,10 @@ db_helper = SqLiteHelper()
 db_helper.init_db()
 players_controller = PlayersController(db_helper)
 events_controller = EventController(db_helper)
-sub_controller = SubscriptionController(db_helper)
+subject = SubscriptionSubject()
+observer = MemberPaymentObserver(db_helper)
+subject.attach(observer)
+sub_controller = SubscriptionController(db_helper,subject)
 dict_factory = DictFactory()
 
 
@@ -35,19 +40,18 @@ def get_player(player_id):
 @app.post("/players")
 def add_player():
     data = request.json
-    player = Player(
-        name=data.get("name", ""),
-        email=data.get("email", ""),
-        age=data.get("age", 0),
-        phone=data.get("phone", ""),
-        category=data.get("category", "Cadets"),
-        address=data.get("address", ""),
-        join_date=data.get("join_date", ""),
-        positions=data.get("positions", []),
-        skills=data.get("skills", []),
-        subscription_status=data.get("subscription_status", "Unpaid")
-    )
-    players_controller.insert_player(player)
+    name = NameAdapter(data.get("firstname", ""),data.get("lastname","")).get_name()
+    p = (MemberBuilder().set_name(name)
+                        .set_email(data.get("email",""))
+                        .set_age(data.get("age",0))
+                        .set_phone(data.get("phone",""))
+                        .set_category(data.get("category", "Cadets"))
+                        .set_address(data.get("address",""))
+                        .set_join_date(data.get("join_date",""))
+                        .set_positions(data.get("positions"))
+                        .set_skills(data.get("skills",""))
+                        .set_subscription_status(data.get("subscription_status", "Unpaid")))
+    players_controller.insert_player(p)
     return jsonify({"status": "ok"})
 
 @app.delete("/players/<int:player_id>")
@@ -68,17 +72,14 @@ def list_events():
 @app.post("/events")
 def insert_event():
     data = request.json
-    event = Event(
-        id = 0,
-        name=data.get("name", ""),
-        date=data.get("date", ""),
-        e_type=data.get("e_type", "Match"),
-        organizer=data.get("organizer", ""),
-        result=data.get("result", ""),
-        opponent=data.get("opponent",""),
-        duration=data.get("duration","")
-    )
-    events_controller.insert_event(event)
+    e = (EventBuilder().set_name(data.get("name", ""))
+                        .set_date(data.get("date", ""))
+                        .set_e_type(data.get("e_type", "Match"))
+                        .set_organizer(data.get("organizer", ""))
+                        .set_result(data.get("result", ""))
+                        .set_opponent(data.get("opponent",""))
+                        .set_duration(data.get("duration","")))
+    events_controller.insert_event(e)
     return jsonify({"status": "ok"})
 
 

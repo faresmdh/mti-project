@@ -43,10 +43,17 @@
                 <div class="card">
                     <h2>Add New Member</h2>
                     <form id="player-form">
-                        <div class="form-group">
-                            <label for="name">Name *</label>
-                            <input type="text" id="name" required>
-                            <div class="error-message" id="name-error"></div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstname">Firstname *</label>
+                                <input type="text" id="firstname" required>
+                                <div class="error-message" id="firstname-error"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastname">Lastname *</label>
+                                <input type="text" id="lastname" required>
+                                <div class="error-message" id="lastname-error"></div>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -258,7 +265,8 @@
             });
 
             // Get form values
-            const name = document.getElementById('name').value.trim();
+            const firstname = document.getElementById('firstname').value.trim();
+            const lastname = document.getElementById('lastname').value.trim();
             const email = document.getElementById('email').value.trim();
             const age = parseInt(document.getElementById('age').value) || 0;
             const phone = document.getElementById('phone').value.trim();
@@ -278,8 +286,13 @@
             // Validation
             let isValid = true;
 
-            if (!name) {
-                document.getElementById('name-error').textContent = 'Name is required';
+            if (!firstname) {
+                document.getElementById('firstname-error').textContent = 'Firstname is required';
+                isValid = false;
+            }
+
+            if (!lastname) {
+                document.getElementById('lastname-error').textContent = 'Lastname is required';
                 isValid = false;
             }
 
@@ -295,7 +308,8 @@
 
             // Create player object
             const player = {
-                name,
+                firstname,
+                lastname,
                 email,
                 age,
                 phone,

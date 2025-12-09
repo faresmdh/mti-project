@@ -1,11 +1,13 @@
+from controllers.subscription_subject import SubscriptionSubject
 from db.db_helper import SqLiteHelper
 from models.player import Player
 from models.subscription import Subscription
 
 
 class SubscriptionController:
-    def __init__(self,db_helper:SqLiteHelper):
+    def __init__(self,db_helper:SqLiteHelper, subject: SubscriptionSubject):
         self.db = db_helper
+        self.subject = subject
 
     def insert_subscription(self, s: Subscription):
         conn = self.db.get_connection()
@@ -15,6 +17,12 @@ class SubscriptionController:
            VALUES (?, ?, ?, ?, ?)
         """, (s.player_id, s.date, s.status, s.amount, s.duration))
         conn.commit()
+        if(s.status == 'Paid'):
+            self.subject.notify({
+                "type": "subscription_paid",
+                "member_id": s.player_id,
+                "subscription_id": s.id
+            })
 
     def list_subscriptions(self):
         conn = self.db.get_connection()

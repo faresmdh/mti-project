@@ -215,6 +215,74 @@ def add_subscription():
         return jsonify({"status": "error", "message": "Something went wrong"}), 500
 ```
 
+* **Adapter :**
+We have created a class named NameAdapter that link the firstname and the lastname of a new member to a fullname.
+```python
+class NameAdapter:
+    def __init__(self,firstname,lastname):
+        self.name = firstname + " " + lastname
+        
+    def get_name(self):
+        return self.name
+```
+applying this design pattern helped us receive both first and last names from interface and convert them into a full name at the backend. This will prevent users entering only firstname or lastname.
+```python
+    data = request.json
+    name = NameAdapter(data.get("firstname", ""),data.get("lastname","")).get_name()
+```
+* **Observer :**
+
+An observer has been implemented to listen for subscription insert events.
+Whenever a new subscription is created, the observer checks whether it is marked as paid.
+If the subscription is paid, the observer is automatically notified and triggers the appropriate update actions (such as updating the member’s subscription status).
+**Subject**
+```python
+class SubscriptionSubject:
+    def __init__(self):
+        self._observers = []
+
+    def attach(self, observer):
+        self._observers.append(observer)
+
+    def detach(self, observer):
+        self._observers.remove(observer)
+
+    def notify(self, event):
+        for observer in self._observers:
+            observer.update(event)
+```
+**MemberPaymentObserver**
+```python
+
+from controllers.players_controller import PlayersController
+
+
+class MemberPaymentObserver:
+    def __init__(self,db_helper):
+        self.db = db_helper
+    def update(self, event):
+        if event["type"] == "subscription_paid":
+            member_id = event["member_id"]
+            PlayersController(self.db).mark_player_sub_paid(member_id)
+```
+The player subscription status was not changing even when new subscription added. After implementing this observer that bug was fixed.
+```python
+    def insert_subscription(self, s: Subscription):
+        conn = self.db.get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+           INSERT INTO subscriptions (player_id, date, status, amount, duration)
+           VALUES (?, ?, ?, ?, ?)
+        """, (s.player_id, s.date, s.status, s.amount, s.duration))
+        conn.commit()
+        if(s.status == 'Paid'):
+            self.subject.notify({
+                "type": "subscription_paid",
+                "member_id": s.player_id,
+                "subscription_id": s.id
+            })
+```
+
 # API Documentation
 This API docs will explain each endpoint including endpoint url, request type (GET, POST or DELETE), request body and the response (case the http request success).
 ## Get all players

@@ -121,3 +121,11 @@ class PlayersController:
         ]
 
         return players
+
+    def mark_player_sub_paid(self,player_id):
+        conn = self.db.get_connection()
+        cur = conn.cursor()
+
+        cur.execute("UPDATE players SET subscription_status = 'Paid' WHERE id = ?", (player_id,))
+        conn.commit()
+        conn.close()
